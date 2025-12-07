@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-pod
+  namespace: secureid-app # Target the secured namespace
+spec:
+  securityContext:
+    runAsUser: 0
+    runAsGroup: 0
+  containers:
+  - name: violation-container
+    image: busybox
+    command: ["sleep", "3600"]

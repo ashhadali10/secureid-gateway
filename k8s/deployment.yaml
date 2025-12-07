@@ -1,0 +1,39 @@
+# k8s/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secureid-gateway
+  labels:
+    app: secureid-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secureid-gateway
+  template:
+    metadata:
+      labels:
+        app: secureid-gateway
+    spec:
+      containers:
+      - name: app
+        image: secureid-gateway:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        # 🔒 CKS Security Hardening Start
+        securityContext:
+          allowPrivilegeEscalation: false     # Kabhi bhi root nahi banayega
+          readOnlyRootFilesystem: true        # Filesystem ko read-only rakho
+          runAsNonRoot: true                  # Root user par nahi chalega
+          runAsUser: 1001                     # Humara custom non-root user
+          capabilities:
+            drop: ["ALL"]                     # Sab extra Linux capabilities hatao
+        # 🔒 CKS Security Hardening End
+        # Optional: Liveness/Readiness probes (CKS mein achha lagta hai)
+        livenessProbe:
+          httpGet:
+            path: /profile/user123
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
